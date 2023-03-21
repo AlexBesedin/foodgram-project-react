@@ -17,7 +17,7 @@ class User(AbstractUser):
         )
     email = models.EmailField(
         max_length=254, 
-        verbose_name = 'Email'
+        verbose_name = 'Email',
         unique=True
         )
     first_name = models.CharField(
@@ -64,7 +64,7 @@ class Follow(models.Model):
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
 
-     def __str__(self):
+    def __str__(self):
         return f'Пользователь: {self.user}, Автор: {self.author}'
 
     def save(self, *args, **kwargs):
