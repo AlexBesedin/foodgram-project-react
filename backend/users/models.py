@@ -63,11 +63,17 @@ class Follow(models.Model):
         ordering = ('-user',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        constraints = (
+            models.UniqueConstraint (
+                fields = ('user', 'author'), name='follow_user_author_unique'),
+        )
+
 
     def __str__(self):
         return f'Пользователь: {self.user}, Автор: {self.author}'
 
-    def save(self, *args, **kwargs):
-        if self.user == self.author:
-            raise ValueError("Нельзя подписаться на самого себя")
-        super().save(*args, **kwargs)
+
+    # def save(self, *args, **kwargs):
+    #     if self.user == self.author:
+    #         raise ValueError("Нельзя подписаться на самого себя")
+    #     super().save(*args, **kwargs)
