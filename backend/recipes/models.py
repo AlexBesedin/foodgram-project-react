@@ -59,6 +59,7 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+
 class Recipe(models.Model):
     """Модель рецептов"""
     author = models.ForeignKey(
@@ -83,7 +84,9 @@ class Recipe(models.Model):
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления в минутах',
         validators=[validators.MinValueValidator(
-            1, message='Мин. время приготовления 1 минута'), ])
+            1, message='Мин. время приготовления 1 минута'), 
+            ]
+            )
     pub_date = models.DateTimeField(
         verbose_name='Время публикации',
         auto_now_add=True,
@@ -127,3 +130,72 @@ class RecipeIngredient(models.Model):
         validators = [validators.MinLengthValidator(
             1, message='Минимальное количество ингредиентов 1')]
         )
+
+    class Meta:
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('recipe', 'ingredient'),
+                name='unique_recipe_ingredient'
+            )
+        ]
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Автор списка избранного'
+        )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Рецепт из списка избранного'
+        )
+    date_added = DateTimeField(
+        verbose_name='Дата добавления',
+        auto_now_add=True,
+        editable=False
+    )        
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite_recipe'
+            )
+        ]
+
+class ShopingList(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Юзер списка покупок'
+        )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Список покупок'
+        )
+    date_add = DateTimeField(
+        verbose_name='Дата добавления',
+        auto_now_add=True,
+        editable=False
+    )    
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite_recipe'
+            )
+        ]        
