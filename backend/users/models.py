@@ -9,7 +9,7 @@ class MyUser(AbstractUser):
         max_length=150,
         verbose_name = 'Логин', 
         unique=True,
-        validators=[validators.RegexValidator(regex='^[\w.@+-]+\z')]
+        validators=[validators.RegexValidator(regex='^[\w.@+-]+$')]
         )
     password = models.CharField(
         max_length=150,
