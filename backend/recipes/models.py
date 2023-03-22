@@ -1,5 +1,8 @@
 from django.db import models
-from users.models import User
+from django.db.models import DateTimeField
+from users.models import MyUser
+from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, MinLengthValidator
 
 
 class Ingredient(models.Model):
@@ -17,12 +20,12 @@ class Ingredient(models.Model):
         ordering = ['name']
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        constraints = (
+        constraints = [
             models.UniqueConstraint (
                 fields = ('name', 'measurement_unit'), 
                 name='ingredient_name_unit_unique'
                 )
-        )
+        ]
     
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}.'
@@ -39,7 +42,7 @@ class Tag(models.Model):
         verbose_name = "Цвет в HEX",
         unique=True,
         validators = [
-            validators.RegexValidator(
+            RegexValidator(
                 regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
                 message='Ваше значение не является цветом'
             )
@@ -63,7 +66,7 @@ class Tag(models.Model):
 class Recipe(models.Model):
     """Модель рецептов"""
     author = models.ForeignKey(
-        User,
+        MyUser,
         on_delete = models.CASCADE,
         related_name = 'recipe',
         verbose_name = 'Автор'
@@ -83,7 +86,7 @@ class Recipe(models.Model):
         )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления в минутах',
-        validators=[validators.MinValueValidator(
+        validators=[MinValueValidator(
             1, message='Мин. время приготовления 1 минута'), 
             ]
             )
@@ -125,11 +128,11 @@ class RecipeIngredient(models.Model):
         related_name='amount',
         verbose_name='Ингредиент'
     )
-    amount =  models.PositiveIntegerField(
+    amount = models.PositiveIntegerField(
         verbose_name='Количество',
-        validators = [validators.MinLengthValidator(
-            1, message='Минимальное количество ингредиентов 1')]
-        )
+        validators=[MinLengthValidator(1, 
+        message='Минимальное количество ингредиентов 1')]
+    )
 
     class Meta:
         verbose_name = 'Количество ингредиента'
@@ -143,8 +146,9 @@ class RecipeIngredient(models.Model):
 
 
 class Favorite(models.Model):
+    """Модель списка избранного"""
     user = models.ForeignKey(
-        User,
+        MyUser,
         on_delete=models.CASCADE,
         related_name='favorite',
         verbose_name='Автор списка избранного'
@@ -157,8 +161,7 @@ class Favorite(models.Model):
         )
     date_added = DateTimeField(
         verbose_name='Дата добавления',
-        auto_now_add=True,
-        editable=False
+        auto_now_add=True
     )        
 
     class Meta:
@@ -172,8 +175,9 @@ class Favorite(models.Model):
         ]
 
 class ShopingList(models.Model):
+    """Модель списка покупок"""
     user = models.ForeignKey(
-        User,
+        MyUser,
         on_delete=models.CASCADE,
         related_name='cart',
         verbose_name='Юзер списка покупок'
@@ -186,8 +190,7 @@ class ShopingList(models.Model):
         )
     date_add = DateTimeField(
         verbose_name='Дата добавления',
-        auto_now_add=True,
-        editable=False
+        auto_now_add=True
     )    
 
     class Meta:
@@ -196,6 +199,6 @@ class ShopingList(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_favorite_recipe'
+                name='unique_list_recipe'
             )
-        ]        
+        ]  

@@ -3,8 +3,7 @@ from django.db import models
 from django.core import validators
 
 
-
-class User(AbstractUser):
+class MyUser(AbstractUser):
     """ Кастомная модель пользователя. """
     username = models.CharField(
         max_length=150,
@@ -48,13 +47,13 @@ class User(AbstractUser):
 class Follow(models.Model):
     """Модель подписки на авторов"""
     user = models.ForeignKey(
-        User,
+        MyUser,
         related_name='follower',
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
     )
     author = models.ForeignKey(
-        User,
+        MyUser,
         related_name='following',
         on_delete=models.CASCADE,
         verbose_name='Автор',
