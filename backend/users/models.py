@@ -3,6 +3,7 @@ from django.db import models
 from django.core import validators
 
 
+
 class User(AbstractUser):
     """ Кастомная модель пользователя. """
     username = models.CharField(
