@@ -41,6 +41,7 @@ class MyUserCreateSerializer(UserCreateSerializer):
 
 
 class MyUserSerializer(UserSerializer):
+    """Сериализатор модели User"""
     is_subscribed = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -60,10 +61,4 @@ class MyUserSerializer(UserSerializer):
         if request.is_authenticated and request.following.filter(id=obj).exist():
             return True
         return False
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = super().create(validated_data)
-        user.set_password(password)
-        user.save()
-        return user        
+   

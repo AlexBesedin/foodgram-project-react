@@ -2,6 +2,10 @@ from django.shortcuts import render
 from djoser.views import UserViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+
+
 from djoser.serializers import UserSerializer
 from .serializers import MyUserSerializer, MyUserCreateSerializer
 from users.models import MyUser
