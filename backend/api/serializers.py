@@ -10,8 +10,14 @@ class MyUserCreateSerializer(UserCreateSerializer):
     """ Сериализатор создания пользователя. """
     
     class Meta:
-        models = MyUser 
-        fields = ('email', 'username', 'first_name', 'last_name', 'password')
+        model = MyUser 
+        fields = (
+            'email', 
+            'username', 
+            'first_name', 
+            'last_name', 
+            'password'
+            )
 
 
     def validate_username(self, value):
@@ -21,6 +27,17 @@ class MyUserCreateSerializer(UserCreateSerializer):
         if not re.match(r'^[\w.@+-]+$', value):
             raise ValidationError('Недопустимое имя пользователя')        
         return value        
+
+    def create(self, validated_data):
+        user = MyUser.objects.create(
+            username=validated_data.get('username'),
+            email=validated_data.get('email'),
+            first_name=validated_data.get('first_name'),
+            last_name=validated_data.get('last_name')
+        )
+        user.set_password(validated_data.get('password'))
+        user.save()
+        return user
 
 
 class MyUserSerializer(UserSerializer):
@@ -42,4 +59,11 @@ class MyUserSerializer(UserSerializer):
         request = self.context['request'].user
         if request.is_authenticated and request.following.filter(id=obj).exist():
             return True
-        return False    
+        return False
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = super().create(validated_data)
+        user.set_password(password)
+        user.save()
+        return user        
