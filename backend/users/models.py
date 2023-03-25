@@ -29,7 +29,7 @@ class MyUser(AbstractUser):
         verbose_name = 'Фамилия'
         )   
     is_subscribed = models.BooleanField(
-        verbose_name = 'Подписан ли пользователь',
+        verbose_name = 'Активирован',
         default=True
         )
 
