@@ -1,9 +1,10 @@
 import re
 
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from users.models import MyUser
+from users.models import MyUser, Follow
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
+from .validators import follow_unique_validator
 
 
 class MyUserCreateSerializer(UserCreateSerializer):
@@ -61,4 +62,21 @@ class MyUserSerializer(UserSerializer):
         if request.is_authenticated and request.following.filter(id=obj).exist():
             return True
         return False
-   
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Follow
+        fields = (
+            'id',
+            'user',
+            'author'
+            )
+        validators = [follow_unique_validator]
+
+
+    def save(self, *args, **kwargs):
+        if self.user == self.author:
+            raise ValueError("Нельзя подписаться на самого себя")
+        super().save(*args, **kwargs)
