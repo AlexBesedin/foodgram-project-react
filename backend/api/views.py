@@ -58,7 +58,6 @@ class MyUserViewSet(UserViewSet):
 
     def subscribe(self, request):
         """Подписаться / Отписаться на/от пользователя"""
-        pass #FollowSerializer
         user = request.user
         author = get_object_or_404(User, id=id)
         serializer_data = {
