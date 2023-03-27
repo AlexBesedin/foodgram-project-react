@@ -1,13 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from djoser.views import UserViewSet
+from djoser.serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
-
-from djoser.serializers import UserSerializer
-from .serializers import MyUserSerializer, MyUserCreateSerializer
+from .serializers import MyUserSerializer, MyUserCreateSerializer, FollowSerializer
 from users.models import MyUser
 
 
@@ -41,18 +40,42 @@ class MyUserViewSet(UserViewSet):
         methods=['GET', ],
         detail=False,
         url_path='subscriptions',
-        permission_classes=[IsAuthenticated, ]     
+        permission_classes=[IsAuthenticated, ]
+        )     
 
-    def get_subscriptions(self, request):
-        """Возвращает пользователей, на которых подписан текущий пользователь."""
-        pass
+    def subscriptions(self, request):
+        """Выдает авторов, на кого подписан пользователь"""
+        user = request.user
+        queryset = user.author.following.all()
+        serializer = FollowingShowSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     @action(
         methods=['POST', 'DELETE'],
         detail=False,
         url_path='subscriptions',
-        permission_classes=[IsAuthenticated, ]
+        permission_classes=[IsAuthenticated, ])
 
     def subscribe(self, request):
         """Подписаться / Отписаться на/от пользователя"""
-        pass       
+        pass #FollowSerializer
+        user = request.user
+        author = get_object_or_404(User, id=id)
+        serializer_data = {
+            'user': user.id, 
+            'author': author.id
+            }
+        serializer = FollowSerializer(
+            data=serializer_data, 
+            context={
+                'request': request
+                }
+                )
+        if request.method == 'POST':
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            subscription = get_object_or_404(Follow, user=user, author=author)
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)      
