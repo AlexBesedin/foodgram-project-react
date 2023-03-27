@@ -3,7 +3,7 @@ from djoser.views import UserViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 
 
 from djoser.serializers import UserSerializer
@@ -36,3 +36,13 @@ class MyUserViewSet(UserViewSet):
                 return MyUserCreateSerializer
             return UserSerializer
         return super().get_serializer_class()
+
+    # @action(
+    #     methods=['GET', ],
+    #     detail=False,
+    #     url_path='subscriptions',
+    #     permission_classes=[IsAuthenticated, ]     
+
+    # def get_subscriptions(self, request):
+    #     """Возвращает пользователей, на которых подписан текущий пользователь."""
+        

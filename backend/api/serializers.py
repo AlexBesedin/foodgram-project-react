@@ -6,7 +6,7 @@ from recipes.models import Recipe
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from .validators import follow_unique_validator
-from rest_framework.fields import Base64ImageField
+from drf_extra_fields.fields import Base64ImageField
 
 
 

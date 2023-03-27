@@ -74,8 +74,3 @@ class Follow(models.Model):
     def __str__(self):
         return f'Пользователь: {self.user}, Автор: {self.author}'
 
-
-    # def save(self, *args, **kwargs):
-    #     if self.user == self.author:
-    #         raise ValueError("Нельзя подписаться на самого себя")
-    #     super().save(*args, **kwargs)
