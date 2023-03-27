@@ -64,9 +64,10 @@ class MyUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context['request'].user
-        if request.is_authenticated and request.following.filter(id=obj).exist():
+        if request.is_authenticated and request.following.filter(id=obj.id).exists():
             return True
         return False
+
 
 
 class FollowShowRecipeSerializer(serializers.ModelSerializer):
@@ -81,7 +82,7 @@ class FollowShowRecipeSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time'
             )
-        read_only_fields = '__all__'    
+        read_only_fields = fields   
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -97,21 +98,37 @@ class FollowSerializer(serializers.ModelSerializer):
         validators = [follow_unique_validator]
 
 
-    def save(self, *args, **kwargs):
-        if self.user == self.author:
-            raise ValueError("Нельзя подписаться на самого себя")
-        super().save(*args, **kwargs)
+    def validate(self, data):
+        """
+        Проверяем, что пользователь не подписывается на самого себя.
+        """
+        request_user = self.context['request'].user
+        author = data.get('author')
+        if request_user == author:
+            raise serializers.ValidationError("Нельзя подписаться на самого себя")
+        return data
+
 
 
 class UserFollowSerializer(UserSerializer):
     """Сериализатор вывода авторов на которых только что подписался пользователь.  
     В выдачу добавляются рецепты."""
-    recipe = FollowShowRecipeSerializer(many=True, read_only=True)
+    recipes = FollowShowRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
 
-    class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ('recipes_count', )
+    class Meta:
         model = MyUser
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+        )
+        read_only_fields = '__all__',
 
     def get_recipes_count(self, obj):
         recipes = Recipe.objects.filter(author=obj)

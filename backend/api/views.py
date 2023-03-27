@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet
 from djoser.serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -6,9 +7,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
-from .serializers import MyUserSerializer, MyUserCreateSerializer, FollowSerializer
-from users.models import MyUser
+from .serializers import MyUserSerializer, MyUserCreateSerializer, UserFollowSerializer, FollowSerializer
+from users.models import MyUser, Follow
 
+
+User = get_user_model()
 
 class MyUserViewSet(UserViewSet):
     """Viewset для объектов модели User"""
@@ -21,6 +24,7 @@ class MyUserViewSet(UserViewSet):
         methods=['GET', ],
         detail=False,
         url_path='me',
+        url_name='me',
         permission_classes=[IsAuthenticated, ]
     )
     def me(self, request):
@@ -37,44 +41,51 @@ class MyUserViewSet(UserViewSet):
         return super().get_serializer_class()
 
     @action(
-        methods=['GET', ],
+        methods=['GET', 'HEAD'],
         detail=False,
         url_path='subscriptions',
+        url_name='subscriptions',
         permission_classes=[IsAuthenticated, ]
         )     
 
     def subscriptions(self, request):
         """Выдает авторов, на кого подписан пользователь"""
         user = request.user
-        queryset = user.author.following.all()
-        serializer = FollowingShowSerializer(queryset, many=True)
+        queryset = user.following.all().values_list('author', flat=True)
+        authors = MyUser.objects.filter(pk__in=queryset)
+        serializer = UserFollowSerializer(authors, many=True)
         return Response(serializer.data)
 
     @action(
         methods=['POST', 'DELETE'],
         detail=False,
-        url_path='subscriptions',
+        url_path='subscribe',
+        url_name='subscribe',
         permission_classes=[IsAuthenticated, ])
 
-    def subscribe(self, request):
-        """Подписаться / Отписаться на/от пользователя"""
+
+    def subscribe(self, request, id):
+        """Подписаться/отписаться на/от автора"""
         user = request.user
-        author = get_object_or_404(MyUser, id=id)
-        serializer_data = {
-            'user': user.id, 
-            'author': author.id
-            }
-        serializer = FollowSerializer(
-            data=serializer_data, 
-            context={
-                'request': request
-                }
-                )
+        author = get_object_or_404(User, id=id)
         if request.method == 'POST':
+            serializer = FollowSerializer(
+                data={
+                    'user': user.id,
+                    'author': author.id
+                },
+                context={'request': request}
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            subscription = get_object_or_404(Follow, user=user, author=author)
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)      
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        subscription = get_object_or_404(
+            Subscription,
+            user=user,
+            author=author
+        )
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)   
