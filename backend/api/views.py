@@ -37,12 +37,22 @@ class MyUserViewSet(UserViewSet):
             return UserSerializer
         return super().get_serializer_class()
 
-    # @action(
-    #     methods=['GET', ],
-    #     detail=False,
-    #     url_path='subscriptions',
-    #     permission_classes=[IsAuthenticated, ]     
+    @action(
+        methods=['GET', ],
+        detail=False,
+        url_path='subscriptions',
+        permission_classes=[IsAuthenticated, ]     
 
-    # def get_subscriptions(self, request):
-    #     """Возвращает пользователей, на которых подписан текущий пользователь."""
-        
+    def get_subscriptions(self, request):
+        """Возвращает пользователей, на которых подписан текущий пользователь."""
+        pass
+
+    @action(
+        methods=['POST', 'DELETE'],
+        detail=False,
+        url_path='subscriptions',
+        permission_classes=[IsAuthenticated, ]
+
+    def subscribe(self, request):
+        """Подписаться / Отписаться на/от пользователя"""
+        pass       

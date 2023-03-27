@@ -69,7 +69,7 @@ class MyUserSerializer(UserSerializer):
         return False
 
 
-class SecondRecipeSerializer(serializers.ModelSerializer):
+class FollowShowRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для отображени модели Recipe для эндпоинта api/users/{id}/subscribe/"""
     image = Base64ImageField()
 
@@ -106,22 +106,13 @@ class FollowSerializer(serializers.ModelSerializer):
 class UserFollowSerializer(UserSerializer):
     """Сериализатор вывода авторов на которых только что подписался пользователь.  
     В выдачу добавляются рецепты."""
-    recipe = SecondRecipeSerializer(many=True, read_only=True)
+    recipe = FollowShowRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
 
-    class Meta:
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ('recipes_count', )
         model = MyUser
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count'
-            )
 
-    def get_count_recipes(self, obj):
+    def get_recipes_count(self, obj):
         recipes = Recipe.objects.filter(author=obj)
         return recipes.count()        
