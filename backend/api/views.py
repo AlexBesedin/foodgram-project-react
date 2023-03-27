@@ -15,6 +15,7 @@ class MyUserViewSet(UserViewSet):
     """Viewset для объектов модели User"""
     queryset = MyUser.objects.all()
     serializer_class = MyUserSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     
 
     @action(
