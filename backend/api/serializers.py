@@ -2,10 +2,12 @@ import re
 
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from users.models import MyUser, Follow
-from recipe.models import Recipe
+from recipes.models import Recipe
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from .validators import follow_unique_validator
+from rest_framework.fields import Base64ImageField
+
 
 
 class MyUserCreateSerializer(UserCreateSerializer):
@@ -67,9 +69,9 @@ class MyUserSerializer(UserSerializer):
         return False
 
 
-class SecondRecipeSerializer(ModelSerializer):
+class SecondRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для отображени модели Recipe для эндпоинта api/users/{id}/subscribe/"""
-     image = Base64ImageField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
