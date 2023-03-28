@@ -2,7 +2,7 @@ import re
 
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from users.models import MyUser, Follow
-from recipes.models import Recipe, Tag
+from recipes.models import Recipe, Tag, Ingredient
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from .validators import follow_unique_validator, color_validator
@@ -148,3 +148,15 @@ class TagSerializer(serializers.ModelSerializer):
             'color',
             'slug',
         )
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор для ингридиентов"""
+
+    class Meta:
+        model = Ingredient  
+        fields = (
+            'id',
+            'name',
+            'measurement_unit'
+        ) 

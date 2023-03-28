@@ -6,12 +6,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status, permissions, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
 
+from .filters import IngredientFilter
+from .permissions import IsAdminOrReadOnly
 from .serializers import (
     MyUserSerializer, MyUserCreateSerializer, 
-    UserFollowSerializer, FollowSerializer, TagSerializer)
+    UserFollowSerializer, FollowSerializer, TagSerializer, IngredientSerializer)
 from users.models import MyUser, Follow
-from recipes.models import Tag
+from recipes.models import Tag, Ingredient
 
 
 User = get_user_model()
@@ -99,4 +102,14 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     paginationa_class = None
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)     
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class IngredientViewSet(viewsets.ModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = [DjangoFilterBackend]
+    filter_class = IngredientFilter
+    search_fields = ('^name', )
+    paginationa_class = None
