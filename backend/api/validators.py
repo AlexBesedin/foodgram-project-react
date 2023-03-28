@@ -1,5 +1,6 @@
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import Follow
+from recipes.models import ShopingList, Favorite
 from django.core.validators import RegexValidator
 
 
@@ -16,3 +17,20 @@ color_validator = [
                 message='Ваше значение не является цветом'
             )
         ]
+
+
+shopping_cart_validator = [
+            UniqueTogetherValidator(
+                queryset=ShopingList.objects.all(),
+                fields=["recipe", "user"],
+                message='Этот рецепт уже в корзине'
+            )
+        ]
+
+favorite_validator = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=['user', 'recipe'],
+                message='Этот рецепт уже добавлен в Избранное'
+            )
+        ]        

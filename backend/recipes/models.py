@@ -180,11 +180,7 @@ class ShopingList(models.Model):
         on_delete=models.CASCADE,
         related_name='cart',
         verbose_name='Список покупок'
-        )
-    date_add = DateTimeField(
-        verbose_name='Дата добавления',
-        auto_now_add=True
-    )    
+        )    
 
     class Meta:
         verbose_name = 'Избранное'

@@ -2,10 +2,10 @@ import re
 
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from users.models import MyUser, Follow
-from recipes.models import Recipe, Tag, Ingredient
+from recipes.models import Recipe, Tag, Ingredient, ShopingList
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from .validators import follow_unique_validator, color_validator
+from .validators import follow_unique_validator, color_validator, shopping_cart_validator
 from drf_extra_fields.fields import Base64ImageField
 
 
@@ -159,4 +159,32 @@ class IngredientSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'measurement_unit'
-        ) 
+        )
+
+
+# class RecipeSerializer(serializers.ModelSerializer):
+#     pass 
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для избранного"""
+
+    class Meta:
+        models = Favorite
+        fields = (
+            'user',
+            'recipe'
+            )
+        validators = [favorite_validator]
+
+
+class ShopingListSerializer(serializers.ModelSerializer):
+    """Сериализатор для списка покупок"""
+
+    class Meta:
+        model = ShopingList
+        fields = (
+            'user',
+            'recipe'
+            )
+        validators = [shopping_cart_validator]    
