@@ -2,10 +2,11 @@ import re
 
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from users.models import MyUser, Follow
-from recipes.models import Recipe, Tag, Ingredient, ShopingList
+from recipes.models import Recipe, Tag, Ingredient, ShopingList, Recipe, RecipeIngredient, Favorite
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from .validators import follow_unique_validator, color_validator, shopping_cart_validator
+from .validators import (follow_unique_validator, color_validator, 
+                        shopping_cart_validator, recipe_ingredient_validators, favorite_validator)
 from drf_extra_fields.fields import Base64ImageField
 
 
@@ -162,9 +163,43 @@ class IngredientSerializer(serializers.ModelSerializer):
         )
 
 
-# class RecipeSerializer(serializers.ModelSerializer):
-#     pass 
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор модели RecipeIngredient"""
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit'
+        ) 
 
+    class Meta:
+        model = RecipeIngredient
+        fields = (
+            'id', 
+            'name', 
+            'measurement_unit', 
+            'amount'
+            )
+        validators = [recipe_ingredient_validators] 
+
+
+class RecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для рецептов для GET-рецептов."""
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+            )
+   
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для избранного"""
