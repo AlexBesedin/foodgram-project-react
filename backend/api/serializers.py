@@ -2,10 +2,10 @@ import re
 
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from users.models import MyUser, Follow
-from recipes.models import Recipe
+from recipes.models import Recipe, Tag
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from .validators import follow_unique_validator
+from .validators import follow_unique_validator, color_validator
 from drf_extra_fields.fields import Base64ImageField
 
 
@@ -99,9 +99,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
     def validate(self, data):
-        """
-        Проверяем, что пользователь не подписывается на самого себя.
-        """
+        """Проверяем, что пользователь не подписывается на самого себя."""
         request_user = self.context['request'].user
         author = data.get('author')
         if request_user == author:
@@ -132,4 +130,21 @@ class UserFollowSerializer(UserSerializer):
 
     def get_recipes_count(self, obj):
         recipes = Recipe.objects.filter(author=obj)
-        return recipes.count()        
+        return recipes.count()
+
+
+class TagSerializer(serializers.ModelSerializer):
+    """Сериализатор для тегов """
+    
+    color = serializers.CharField(
+        validators=[color_validator]
+        )
+
+    class Meta:
+        model = Tag
+        fields = (
+            'id',
+            'name',
+            'color',
+            'slug',
+        )

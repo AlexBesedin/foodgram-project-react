@@ -5,10 +5,13 @@ from djoser.serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework import status, permissions, viewsets
 
-from .serializers import MyUserSerializer, MyUserCreateSerializer, UserFollowSerializer, FollowSerializer
+from .serializers import (
+    MyUserSerializer, MyUserCreateSerializer, 
+    UserFollowSerializer, FollowSerializer, TagSerializer)
 from users.models import MyUser, Follow
+from recipes.models import Tag
 
 
 User = get_user_model()
@@ -89,3 +92,11 @@ class MyUserViewSet(UserViewSet):
         )
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)   
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    """Viewset для объектов модели Tag"""
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    paginationa_class = None
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)     

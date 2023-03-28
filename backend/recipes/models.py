@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models import DateTimeField
 from users.models import MyUser
-from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MinLengthValidator
 
 
@@ -41,12 +40,6 @@ class Tag(models.Model):
         max_length = 7,
         verbose_name = "Цвет в HEX",
         unique=True,
-        validators = [
-            RegexValidator(
-                regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
-                message='Ваше значение не является цветом'
-            )
-        ]
     )
     slug = models.SlugField(
         max_length = 200,
