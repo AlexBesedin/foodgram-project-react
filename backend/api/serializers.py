@@ -23,7 +23,7 @@ class MyUserCreateSerializer(UserCreateSerializer):
             'last_name', 
             'password'
             )
-
+        extra_kwargs = {'password': {'write_only': True}}
 
     def validate_username(self, value):
         if value.lower == 'me':
@@ -60,7 +60,6 @@ class MyUserSerializer(UserSerializer):
             'last_name',
             'is_subscribed'
             )
-        extra_kwargs = {'password': {'write_only': True}}
 
 
     def get_is_subscribed(self, obj):
@@ -244,8 +243,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
             'pub_date'
             )
-
-
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
