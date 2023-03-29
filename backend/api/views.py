@@ -47,7 +47,7 @@ class MyUserViewSet(UserViewSet):
         return super().get_serializer_class()
 
     @action(
-        methods=['GET', 'HEAD'],
+        methods=['GET', ],
         detail=False,
         url_path='subscriptions',
         url_name='subscriptions',
@@ -57,9 +57,8 @@ class MyUserViewSet(UserViewSet):
     def subscriptions(self, request):
         """Выдает авторов, на кого подписан пользователь"""
         user = request.user
-        queryset = user.following.all().values_list('author', flat=True)
-        authors = MyUser.objects.filter(pk__in=queryset)
-        serializer = UserFollowSerializer(authors, many=True)
+        following_authors = MyUser.objects.filter(following__user=user)
+        serializer = UserFollowSerializer(following_authors, many=True)
         return Response(serializer.data)
 
     @action(
@@ -89,7 +88,7 @@ class MyUserViewSet(UserViewSet):
                 status=status.HTTP_201_CREATED
             )
         subscription = get_object_or_404(
-            Subscription,
+            Follow,
             user=user,
             author=author
         )
