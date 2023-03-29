@@ -259,6 +259,12 @@ class FavoriteSerializer(serializers.ModelSerializer):
             )
         validators = [favorite_validator]
 
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        context = {'request': request}
+        return FollowShowRecipeSerializer(
+            instance.recipe, context=context).data    
+
 
 class ShopingListSerializer(serializers.ModelSerializer):
     """Сериализатор для списка покупок"""
