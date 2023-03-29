@@ -269,4 +269,10 @@ class ShopingListSerializer(serializers.ModelSerializer):
             'user',
             'recipe'
             )
-        validators = [shopping_cart_validator]    
+        validators = [shopping_cart_validator]
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        context = {'request': request}
+        return FollowShowRecipeSerializer(
+            instance.recipe, context=context).data    
