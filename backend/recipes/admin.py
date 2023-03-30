@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from .models import Tag
+
 from .models import Recipe, Ingredient, Tag, RecipeIngredient, Favorite, ShopingList
 
-
+@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -39,12 +39,11 @@ class RecipeAdmin(admin.ModelAdmin):
     empty_value_display = '-empty-'
 
     def count_favorites(self, obj):
-        return obj.favorites.count()
+        return obj.favorite.count()
 
 
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(Tag)
 admin.site.register(RecipeIngredient)
 admin.site.register(Favorite)
 admin.site.register(ShopingList)        

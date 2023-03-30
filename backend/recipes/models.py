@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import DateTimeField
 from users.models import MyUser
-from django.core.validators import MinValueValidator, MinLengthValidator
+from django.core.validators import MinValueValidator, MinValueValidator
 
 
 class Ingredient(models.Model):
@@ -104,7 +104,7 @@ class Recipe(models.Model):
 
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class RecipeIngredient(models.Model):
@@ -112,18 +112,18 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='amount',
+        related_name='recipe_ingredients',
         verbose_name='Рецепт'
         )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.PROTECT,
-        related_name='amount',
+        related_name='recipe_ingredients',
         verbose_name='Ингредиент'
     )
     amount = models.PositiveIntegerField(
         verbose_name='Количество',
-        validators=[MinLengthValidator(1, 
+        validators=[MinValueValidator(1, 
         message='Минимальное количество ингредиентов 1')]
     )
 

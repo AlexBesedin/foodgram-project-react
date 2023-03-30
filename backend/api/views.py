@@ -2,19 +2,20 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet
 from djoser.serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status, permissions, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .filters import IngredientFilter
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (
     MyUserSerializer, MyUserCreateSerializer, 
-    UserFollowSerializer, FollowSerializer, TagSerializer, IngredientSerializer)
+    UserFollowSerializer, FollowSerializer, TagSerializer, 
+    IngredientSerializer, RecipeSerializer, GetRecipeSerializer)
 from users.models import MyUser, Follow
-from recipes.models import Tag, Ingredient
+from recipes.models import Tag, Ingredient, Recipe
 
 
 User = get_user_model()
@@ -105,10 +106,67 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
+    """Viewset для объектов модели Ingredient"""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = IngredientFilter
+    filterset_class = IngredientFilter
     search_fields = ('^name', )
-    paginationa_class = None
+    pagination_class = None
+
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    """Viewset для объектов модели Recipe"""
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    permission_classes = (IsAuthorOrReadOnly, )
+    # filter_backends = (DjangoFilterBackend, )
+    # filterser_class = RecipeFilter
+
+    def get_serializer_class(self):
+        """Определяет какой сериализатор использовать"""
+        if self.request.method in SAFE_METHODS and self.request.method == 'GET':
+            return GetRecipeSerializer
+        return RecipeSerializer
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=True)
+        serializer.save(author=self.request.user)
+
+
+    @action(
+        methods=['POST',],
+        detail=False,
+        url_path='recipes',
+        url_name='recipes',
+        permission_classes=[IsAuthenticated, ])
+
+    def recipes(self, request):
+        serializer = RecipeSerializer(data=request.data, context={'author': request.user})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        methods=['DELETE',],
+        detail=False,
+        url_path='recipes',
+        url_name='recipes',
+        permission_classes=[IsAuthenticated, ])
+
+    def recipe_delete(self, request):
+        recipe_id = request.query_params.get('id')
+        if not recipe_id:
+            return Response({'detail': 'Укажите идентификатор рецепта'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            recipe = Recipe.objects.get(id=recipe_id)
+        except Recipe.DoesNotExist:
+            return Response({'detail': 'Рецепт не найден'}, status=status.HTTP_404_NOT_FOUND)
+        if recipe.author != request.user:
+            return Response({'detail': 'Вы не автор этого рецепта'}, status=status.HTTP_403_FORBIDDEN)
+        recipe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
