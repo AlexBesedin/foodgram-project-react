@@ -138,6 +138,9 @@ class RecipeIngredient(models.Model):
             )
         ]
 
+    def __str__(self):
+        return f'Рецепт: {self.recipe}. Ингридиент: {self.ingredient}, КОЛИЧЕСТВО: {self.amount}'    
+
 
 class Favorite(models.Model):
     """Модель списка избранного"""
@@ -168,13 +171,16 @@ class Favorite(models.Model):
             )
         ]
 
+    def __str__(self):
+        return f'Пользователь: {self.user} добавил в избранное: {self.recipe}'    
+
 class ShopingList(models.Model):
     """Модель списка покупок"""
     user = models.ForeignKey(
         MyUser,
         on_delete=models.CASCADE,
         related_name='cart',
-        verbose_name='Юзер списка покупок'
+        verbose_name='Автор списка покупок'
         )
     recipe = models.ForeignKey(
         Recipe,

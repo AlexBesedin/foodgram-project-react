@@ -34,12 +34,16 @@ class RecipeAdmin(admin.ModelAdmin):
         IngredientsInRecipeInline,
     ]
     exclude = ('ingredients',)
-    list_display = ('id', 'author', 'name', 'count_favorites')
+    list_display = ('id', 'author', 'name', 'count_favorite')
     list_filter = ('author', 'name', 'tags')
     empty_value_display = '-empty-'
 
-    def count_favorites(self, obj):
-        return obj.favorite.count()
+    readonly_fields = ('count_favorite',)
+
+    def count_favorite(self, obj):
+        return obj.favorite.all().count()
+
+    count_favorite.short_description = 'Избранных'
 
 
 admin.site.register(Ingredient, IngredientAdmin)
@@ -47,3 +51,5 @@ admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(RecipeIngredient)
 admin.site.register(Favorite)
 admin.site.register(ShopingList)        
+
+
