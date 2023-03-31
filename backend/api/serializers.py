@@ -201,10 +201,10 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор модели RecipeIngredient"""
-    id = serializers.ReadOnlyField(source='ingredient__id')
-    name = serializers.ReadOnlyField(source='ingredient__name')
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
-        source='ingredient__measurement_unit'
+        source='ingredient.measurement_unit'
         )
     amount = serializers.SerializerMethodField()
 
@@ -239,7 +239,7 @@ class GetRecipeSerializer(serializers.ModelSerializer):
     tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
     author = MyUserSerializer(read_only=True)
     ingredients  = RecipeIngredientSerializer(
-        source='amount',
+        source='recipe_ingredients',
         many=True,
         read_only=True,)
     is_favorited = serializers.SerializerMethodField(read_only=True)
