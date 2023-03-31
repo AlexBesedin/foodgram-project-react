@@ -100,9 +100,14 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = (
             'id',
-            'user',
-            'author'
-            )
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'is_subscribed',
+            'recipes',
+            'count_recipes'
+        )
         validators = [follow_unique_validator]
 
 

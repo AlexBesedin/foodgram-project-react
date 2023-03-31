@@ -15,7 +15,7 @@ from .serializers import (
     UserFollowSerializer, FollowSerializer, TagSerializer, 
     IngredientSerializer, RecipeSerializer, GetRecipeSerializer)
 from users.models import MyUser, Follow
-from recipes.models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe, Favorite
 
 
 User = get_user_model()
@@ -123,7 +123,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly, )
     # filter_backends = (DjangoFilterBackend, )
-    # filterser_class = RecipeFilter
+    # filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         """Определяет какой сериализатор использовать"""
@@ -170,3 +170,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Вы не автор этого рецепта'}, status=status.HTTP_403_FORBIDDEN)
         recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        methods=['POST', 'DELETE'],
+        detail=False,
+        url_path='favorite',
+        url_name='favorite',
+        permission_classes=[IsAuthenticated, ])    
+
+
+    def favorite(self, request, id):
+        """Добавить/Удалить рецепт в/из избранное"""
+        try:
+            recipe = Recipe.objects.get(id=id)
+            favorite = Favorite.objects.get(user=request.user, recipe=recipe)
+            if request.method == 'DELETE':
+                favorite.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        except (Recipe.DoesNotExist, Favorite.DoesNotExist):
+            if request.method == 'POST':
+                Favorite.objects.create(user=request.user, recipe=recipe)
+                serializer = FollowSerializer(recipe)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
