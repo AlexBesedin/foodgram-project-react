@@ -106,7 +106,7 @@ class FollowSerializer(serializers.ModelSerializer):
             'email',
             'is_subscribed',
             'recipes',
-            'count_recipes'
+            'recipes_count'
         )
         validators = [follow_unique_validator]
 
@@ -120,19 +120,23 @@ class FollowSerializer(serializers.ModelSerializer):
         return data
 
     def get_is_subscribed(self, obj):
-        return Follow.objects.filter(
-            user=obj.user, author=obj.author).exists()
+        return Follow.objects.filter(user=obj.author, author=obj.author).exists()
 
     def get_recipes_count(self, obj):
-        return obj.author.recipes.count()
+        return Recipe.objects.filter(author=obj.author).count()
+
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
+        if request is not None:
+            limit = request.GET.get('recipes_limit')
+        else:
+            limit = None
         queryset = Recipe.objects.filter(author=obj.author)
         if limit:
             queryset = queryset[:int(limit)]
-        return ShortRecipeSerializer(queryset, many=True).data    
+        return FollowShowRecipeSerializer(queryset, many=True).data
+    
           
 
 class UserFollowSerializer(UserSerializer):

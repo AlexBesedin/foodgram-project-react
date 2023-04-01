@@ -207,6 +207,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
     def download_shopping_cart(self, request):
+        """Скачать список покупок"""
         # Получаем список всех рецептов, сохраненных в списке покупок текущего пользователя
         shop_list = ShopingList.objects.filter(user=request.user)
         recipes = [item.recipe for item in shop_list]
@@ -241,3 +242,29 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response = HttpResponse(shopping_cart, content_type='text/plain')
         response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
         return response
+
+
+    @action(
+        methods=['POST', 'DELETE'],
+        detail=False,
+        url_path='shopping_cart',
+        url_name='shopping_cart',
+        permission_classes=[IsAuthenticated, ])    
+
+    def shopping_cart(self, request, id ):
+        """Добавить / удалить рецепт в список покупок"""
+        try:
+            recipe = Recipe.objects.get(id=id)
+            shop_cart = ShopingList.objects.get(user=request.user, recipe=recipe)
+            if request.method == 'DELETE':
+                shop_cart.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        except (Recipe.DoesNotExist, ShopingList.DoesNotExist):
+            if request.method == 'POST':
+                shop_cart = ShopingList.objects.create(user=request.user, recipe=recipe)
+                serializer = FollowSerializer(shop_cart.recipe)
+                return Response({'message': 'Рецепт успешно добавлен в список покупок!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'Ошибка! Рецепт не найден в списке покупок', 'data': {}}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'message': 'Bad request'}, status=status.HTTP_400_BAD_REQUEST)
+
