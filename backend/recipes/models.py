@@ -187,7 +187,8 @@ class ShopingList(models.Model):
         on_delete=models.CASCADE,
         related_name='cart',
         verbose_name='Список покупок'
-        )    
+        )
+    date_add = models.DateTimeField(auto_now_add=True)     
 
     class Meta:
         verbose_name = 'Список покупок'
@@ -197,4 +198,7 @@ class ShopingList(models.Model):
                 fields=['user', 'recipe'],
                 name='unique_list_recipe'
             )
-        ]  
+        ]
+
+    def __str__(self):
+        return f'Пользователь: {self.user} добавил в cписок покупок: {self.recipe}'     

@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
 from djoser.views import UserViewSet
 from djoser.serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
@@ -7,6 +8,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status, permissions, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
+from reportlab.pdfgen import canvas
+from collections import defaultdict
 
 from .filters import IngredientFilter
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
@@ -15,7 +18,7 @@ from .serializers import (
     UserFollowSerializer, FollowSerializer, TagSerializer, 
     IngredientSerializer, RecipeSerializer, GetRecipeSerializer)
 from users.models import MyUser, Follow
-from recipes.models import Tag, Ingredient, Recipe, Favorite
+from recipes.models import Tag, Ingredient, Recipe, Favorite, ShopingList
 
 
 User = get_user_model()
@@ -193,3 +196,48 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 serializer = FollowSerializer(recipe)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+    @action(
+        methods=['GET'],
+        detail=False,
+        url_path='download_shopping_cart',
+        url_name='download_shopping_cart',
+        permission_classes=[IsAuthenticated, ])
+
+
+    def download_shopping_cart(self, request):
+        # Получаем список всех рецептов, сохраненных в списке покупок текущего пользователя
+        shop_list = ShopingList.objects.filter(user=request.user)
+        recipes = [item.recipe for item in shop_list]
+
+        # Создаем словарь, где ключами будут имена ингредиентов вместе с их единицами измерения, а значениями будут суммарные количество ингредиентов, необходимых для приготовления всех рецептов
+        ingredients_list = defaultdict(float)
+        for recipe in recipes:
+            for recipe_ingredient in recipe.recipe_ingredients.all():
+                ingredient = recipe_ingredient.ingredient
+                key = f"{ingredient.name} - {ingredient.measurement_unit}"
+                ingredients_list[key] += recipe_ingredient.amount
+
+        # Формируем текстовое представление полученного словаря
+        shopping_cart = ""
+        for key, value in ingredients_list.items():
+            shopping_cart += f"{key} - {value}\n"
+
+    # Создаем PDF-файл, если нужно
+        if request.GET.get('pdf'):
+            pdf_file = io.BytesIO()
+            p = canvas.Canvas(pdf_file)
+            p.drawString(100, 750, "Shopping List")
+            p.drawString(100, 700, shopping_cart)
+            p.save()
+
+            # Отправляем PDF-файл пользователю
+            response = HttpResponse(pdf_file.getvalue(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
+            return response
+
+        # Отправляем текстовый файл пользователю
+        response = HttpResponse(shopping_cart, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
+        return response
