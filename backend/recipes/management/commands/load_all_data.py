@@ -6,7 +6,7 @@ from recipes.models import Ingredient
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        with open('/app/data/ingredients.json', 'r', encoding='utf-8') as file:
+        with open('/root/foodgram-project-react/data/ingredients.json', 'r', encoding='utf-8') as file:
             data = json.load(file)
             for item in data:
                 ingredient = Ingredient.objects.create(
@@ -14,3 +14,5 @@ class Command(BaseCommand):
                     measurement_unit=item['measurement_unit']
                 )
                 self.stdout.write(self.style.SUCCESS(f'Successfully created ingredient {ingredient.name}'))      
+
+                # /app/data/ingredients.json'
