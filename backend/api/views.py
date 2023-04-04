@@ -104,7 +104,6 @@ class TagViewSet(viewsets.ModelViewSet):
     """Viewset для объектов модели Tag"""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    paginationa_class = None
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
