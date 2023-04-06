@@ -31,8 +31,8 @@ User = get_user_model()
 
 class MyUserViewSet(UserViewSet):
     """Viewset для объектов модели User"""
-    queryset = MyUser.objects.all()
-    serializer_class = MyUserSerializer
+    
+    
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = CustomPageNumberPagination
     
@@ -48,7 +48,7 @@ class MyUserViewSet(UserViewSet):
     def subscriptions(self, request):
         """Выдает авторов, на кого подписан пользователь"""
         user = request.user
-        queryset = user.following.values_list('author', flat=True).distinct()
+        queryset = MyUser.objects.filter(following__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = UserFollowSerializer(
             pages, many=True, context={'request': request}
