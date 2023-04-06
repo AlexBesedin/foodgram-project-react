@@ -172,7 +172,7 @@ class Favorite(models.Model):
         ]
 
     def __str__(self):
-        return f'Пользователь: {self.user} добавил в избранное: {self.recipe}'    
+        return f'Пользователь: {self.user} добавил в избранное рецепт: {self.recipe}'    
 
 class ShopingList(models.Model):
     """Модель списка покупок"""

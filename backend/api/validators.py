@@ -34,10 +34,3 @@ favorite_validator = [
                 message='Этот рецепт уже добавлен в Избранное'
             )
         ]   
-
-recipe_ingredient_validators = [
-            UniqueTogetherValidator(
-                queryset=RecipeIngredient.objects.all(),
-                fields=['ingredient', 'recipe']
-            )
-        ]        
