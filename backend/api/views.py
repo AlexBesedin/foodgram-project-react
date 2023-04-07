@@ -16,7 +16,7 @@ from collections import defaultdict
 
 from users.pagination import CustomPageNumberPagination
 
-from .filters import IngredientFilter
+from .filters import IngredientFilter, RecipeFilterBackend
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (
     MyUserSerializer, MyUserCreateSerializer, 
@@ -31,8 +31,6 @@ User = get_user_model()
 
 class MyUserViewSet(UserViewSet):
     """Viewset для объектов модели User"""
-    
-    
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = CustomPageNumberPagination
     
@@ -122,8 +120,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """Viewset для объектов модели Recipe"""
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly, )
-    filter_backends = (DjangoFilterBackend,)
-    # filterset_class = RecipeFilter
+    filter_backends = [RecipeFilterBackend]
     pagination_class = CustomPageNumberPagination
 
     def get_serializer_class(self):
