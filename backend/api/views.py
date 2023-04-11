@@ -1,19 +1,12 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from djoser.views import UserViewSet
-from djoser.serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status, permissions, viewsets,  exceptions
 from django.db.models import Sum
-
-
-from django_filters.rest_framework import DjangoFilterBackend
-from reportlab.pdfgen import canvas
-from collections import defaultdict
-
 from users.pagination import CustomPageNumberPagination
 
 from .filters import IngredientFilter, RecipeFilterBackend
@@ -25,7 +18,6 @@ from .serializers import (
     GetRecipeSerializer, RecipeSerializer, ShortRecipeSerializer)
 from users.models import MyUser, Follow
 from recipes.models import Tag, Ingredient, Recipe, Favorite, ShopingList, RecipeIngredient
-
 
 User = get_user_model()
 
@@ -49,8 +41,7 @@ class MyUserViewSet(UserViewSet):
         queryset = MyUser.objects.filter(following__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = UserFollowSerializer(
-            pages, many=True, context={'request': request}
-        )
+            pages, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
     @action(
