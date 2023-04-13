@@ -120,8 +120,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """Viewset для объектов модели Recipe"""
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly, )
-    filter_backends = [RecipeFilterBackend]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = [RecipeFilterBackend]
     pagination_class = CustomPageNumberPagination
+
 
     def get_serializer_class(self):
         """Определяет какой сериализатор использовать"""

@@ -3,15 +3,14 @@ from django_filters.rest_framework import FilterSet, filters
 from recipes.models import Ingredient
 from distutils.util import strtobool
 from django_filters import rest_framework
-from recipes.models import Favorite, Recipe, ShopingList, Tag
+from recipes.models import Favorite, Recipe, ShopingList, Tag, Ingredient
 from django.db.models import Q
 from rest_framework.filters import BaseFilterBackend
 from django.db.models import Count
 
 
-
 class IngredientFilter(django_filters.FilterSet):
-    name = django_filters.CharFilter(lookup_expr='istartswith')
+    name = django_filters.CharFilter(field_name='name', lookup_expr='istartswith')
     
     class Meta:
         model = Ingredient
