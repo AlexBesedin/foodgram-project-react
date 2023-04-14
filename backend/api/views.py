@@ -6,7 +6,7 @@ from djoser.serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status, permissions, viewsets,  exceptions
+from rest_framework import status, permissions, viewsets, exceptions, filters
 from django.db.models import Sum
 
 
@@ -110,7 +110,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     """Viewset для объектов модели Ingredient"""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filterset_class = IngredientFilter
+    # filterset_class = IngredientFilter
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('^name', )
     pagination_class = None
 
