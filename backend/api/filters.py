@@ -1,7 +1,7 @@
 import django_filters
 from recipes.models import Ingredient
 from distutils.util import strtobool
-from recipes.models import Favorite, Recipe, ShopingList, 
+from recipes.models import Favorite, Recipe, ShopingList, Ingredient
 from rest_framework.filters import BaseFilterBackend
 
 
